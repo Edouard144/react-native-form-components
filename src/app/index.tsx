@@ -1,98 +1,153 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import React, { useState } from 'react';
+import { Stack } from 'expo-router';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Switch,
+  Pressable,
+  ScrollView,
+  Alert,
+} from 'react-native';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
+export default function Index() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [gender, setGender] = useState('Male');
+  const [course, setCourse] = useState('Software Engineering');
+  const [agree, setAgree] = useState(false);
+  const [notifications, setNotifications] = useState(true);
+
+  function handleSubmit() {
+    const formData = {
+      name,
+      email,
+      gender,
+      course,
+      agree,
+      notifications,
+    };
+
+    console.log('Submitted form data:', formData);
+
+    Alert.alert(
+      'Form Submitted',
+      JSON.stringify(formData, null, 2)
     );
   }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <ScrollView
+        keyboardShouldPersistTaps="always"
+        contentContainerStyle={{ padding: 20, paddingTop: 20 }}
+      >
+      <Text>Registration Form</Text>
+
+      <Text>Name</Text>
+      <TextInput
+        placeholder="Enter your name"
+        value={name}
+        onChangeText={setName}
+        autoCapitalize="words"
+      />
+
+      <Text>Email</Text>
+      <TextInput
+        placeholder="Enter your email"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+
+      <Text>Gender</Text>
+
+      {['Male', 'Female'].map((item) => (
+        <Pressable
+          key={item}
+          onPress={() => setGender(item)}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 8,
+          }}
+        >
+          <View
+            style={{
+              width: 18,
+              height: 18,
+              borderRadius: 9,
+              borderWidth: 2,
+              borderColor: 'black',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: 8,
+            }}
+          >
+            {gender === item && (
+              <View
+                style={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: 5,
+                  backgroundColor: 'black',
+                }}
+              />
+            )}
+          </View>
+          <Text>{item}</Text>
+        </Pressable>
+      ))}
+
+      <Text>Course</Text>
+
+      {[
+        'Software Engineering',
+        'Cyber Security',
+        'AI',
+      ].map((item) => (
+        <Pressable
+          key={item}
+          onPress={() => setCourse(item)}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 8,
+          }}
+        >
+          <Text>
+            {course === item ? '🔘' : '⚪'} {item}
+          </Text>
+        </Pressable>
+      ))}
+
+      <Pressable
+        onPress={() => setAgree((previous) => !previous)}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingVertical: 10,
+        }}
+      >
+        <Text>{agree ? '☑' : '☐'} Accept terms</Text>
+      </Pressable>
+
+      <Text>Notifications</Text>
+
+      <Switch
+        value={notifications}
+        onValueChange={setNotifications}
+      />
+
+      <Button
+        title="Submit Form"
+        onPress={handleSubmit}
+      />
+      </ScrollView>
+    </>
   );
 }
-
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
-});
